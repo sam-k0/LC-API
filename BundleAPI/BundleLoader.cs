@@ -84,7 +84,7 @@ namespace LC_API.BundleAPI
                     }
                     catch (Exception ex)
                     {
-                        Plugin.Log.LogError("Failed to load an assetbundle! Path: " + array[i]);
+                        Plugin.Log.LogError(ex.GetType().Name + ": Failed to load an assetbundle! Path: " + array[i]);
                     }
                 }
             }
@@ -100,7 +100,7 @@ namespace LC_API.BundleAPI
                     }
                     catch (Exception ex)
                     {
-                        Plugin.Log.LogError("Failed to load an assetbundle! Path: " + array[i]);
+                        Plugin.Log.LogError(ex.GetType().Name + "Failed to load an assetbundle! Path: " + array[i]);
                     }
                 }
             }
