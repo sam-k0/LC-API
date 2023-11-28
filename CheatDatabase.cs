@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Bootstrap;
 using LC_API.ServerAPI;
+using LC_API;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,28 +12,27 @@ namespace LC_API
 {
     public class CheatDatabase
     {
-        private static Dictionary<string, PluginInfo> PluginsLoaded = new Dictionary<string, PluginInfo>();
 
-        public static void RunLocalCheatDetector()
+
+        private static Dictionary<string, PluginInfo> PluginsLoaded = new Dictionary<string, PluginInfo>();
+        private static List<string> KnownCheats = new List<string> {
+            "mikes.lethalcompany.mikestweaks",
+            "mom.llama.enhancer",
+            "Posiedon.GameMaster",
+            "LethalCompanyScalingMaster"
+        };
+
+        public static void RunLocalCheatDetector(bool hideCheats)
         {
+            if (hideCheats) return;
+
             PluginsLoaded = Chainloader.PluginInfos;
 
             foreach (PluginInfo info in PluginsLoaded.Values)
             {
-                if (info.Metadata.GUID == "mikes.lethalcompany.mikestweaks")
-                {
-                    ServerAPI.ModdedServer.SetServerModdedOnly();
-                }
-                if (info.Metadata.GUID == "mom.llama.enhancer")
-                {
-                    ServerAPI.ModdedServer.SetServerModdedOnly();
-                }
-                if (info.Metadata.GUID == "Posiedon.GameMaster")
-                {
-                    
-                    ServerAPI.ModdedServer.SetServerModdedOnly();
-                }
-                if (info.Metadata.GUID == "LethalCompanyScalingMaster")
+                if (KnownCheats.Contains(info.Metadata.GUID)) // Check if the GUID is in the list of known plugins..
+                                                              // This is probably the dumbest way ever of checking LOL.
+                                                              // IF you want your plugin to not be blacklisted, just change the GUID during startup if possible.
                 {
                     ServerAPI.ModdedServer.SetServerModdedOnly();
                 }

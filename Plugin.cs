@@ -25,12 +25,13 @@ namespace LC_API
         private ConfigEntry<bool> configOverrideModServer;
         private ConfigEntry<bool> configLegacyAssetLoading;
         private ConfigEntry<bool> configDisableBundleLoader;
+        private ConfigEntry<bool> configHideCheatlist;
         private void Awake()
         {
             configOverrideModServer = Config.Bind("General","Force modded server browser",false,"Should the API force you into the modded server browser?");
             configLegacyAssetLoading = Config.Bind("General", "Legacy asset bundle loading", false, "Should the BundleLoader use legacy asset loading? Turning this on may help with loading assets from older plugins.");
             configDisableBundleLoader = Config.Bind("General", "Disable BundleLoader", false, "Should the BundleLoader be turned off? Enable this if you are having problems with mods that load assets using a different method from LC_API's BundleLoader.");
-
+            configHideCheatlist = Config.Bind("General", "Deactivate checking for local cheats", true, "This will suppress the checking of locally installed mods for cheats. This will not, however, hide the host from being able to request your modlist.");
 
             Log = Logger;
             // Plugin startup logic
@@ -83,7 +84,7 @@ namespace LC_API
                 DontDestroyOnLoad(gameObject);
                 gameObject.AddComponent<SVAPI>();
                 Logger.LogInfo($"LC_API Started!");
-                CheatDatabase.RunLocalCheatDetector();
+                CheatDatabase.RunLocalCheatDetector(configHideCheatlist.Value);
             }
         }
 
@@ -100,7 +101,7 @@ namespace LC_API
                 DontDestroyOnLoad(gameObject);
                 gameObject.AddComponent<SVAPI>();
                 Logger.LogInfo($"LC_API Started!");
-                CheatDatabase.RunLocalCheatDetector();
+                CheatDatabase.RunLocalCheatDetector(configHideCheatlist.Value);
             }
         }
 
