@@ -42,22 +42,30 @@ namespace LC_API
             }
 
             Harmony harmony = new Harmony("ModAPI");
-            MethodInfo original = AccessTools.Method(typeof(GameNetworkManager), "SteamMatchmaking_OnLobbyCreated");
-            MethodInfo original2 = AccessTools.Method(typeof(GameNetworkManager), "LobbyDataIsJoinable");
+            // Save anchors
+            MethodInfo trampolineOnLobbyCreate = AccessTools.Method(typeof(GameNetworkManager), "SteamMatchmaking_OnLobbyCreated");
+            MethodInfo trampolineLobbyDataIsJoinable = AccessTools.Method(typeof(GameNetworkManager), "LobbyDataIsJoinable"); // unused?
+            MethodInfo trampolineAwake = AccessTools.Method(typeof(MenuManager), "Awake");
+            MethodInfo trampolineAddChatMessage = AccessTools.Method(typeof(HUDManager), "AddChatMessage");
+            // Create hooks
+            MethodInfo hookOnLobbyCreate = AccessTools.Method(typeof(ManualPatches.ServerPatch), "OnLobbyCreate");
+            MethodInfo hookAwake = AccessTools.Method(typeof(ServerPatch), "Vers");
+            MethodInfo hookAddChatMessage = AccessTools.Method(typeof(ServerPatch), "ChatInterpreter");
 
-            MethodInfo patch = AccessTools.Method(typeof(ManualPatches.ServerPatch), "OnLobbyCreate");
+            harmony.Patch(
+                    trampolineAwake,
+                    new HarmonyMethod(hookAwake)
+            );
+            
+            harmony.Patch(
+                    trampolineAddChatMessage, 
+                    new HarmonyMethod(hookAddChatMessage)
+            );
 
-            MethodInfo original3 = AccessTools.Method(typeof(MenuManager), "Awake");
-
-            MethodInfo patch3 = AccessTools.Method(typeof(ServerPatch), "Vers");
-
-            MethodInfo original4 = AccessTools.Method(typeof(HUDManager), "AddChatMessage");
-
-            MethodInfo patch4 = AccessTools.Method(typeof(ServerPatch), "ChatInterpreter");
-
-            harmony.Patch(original3, new HarmonyMethod(patch3));
-            harmony.Patch(original4, new HarmonyMethod(patch4));
-            harmony.Patch(original, new HarmonyMethod(patch));
+            harmony.Patch(
+                    trampolineOnLobbyCreate,
+                    new HarmonyMethod(hookOnLobbyCreate)
+            );
             
             Networking.GetString += CheatDatabase.RequestModList;
         }

@@ -9,6 +9,7 @@ using UnityEngine;
 
 namespace LC_API.Comp
 {
+    
     internal class SVAPI : MonoBehaviour
     {
         public static MenuManager MenuManager;
