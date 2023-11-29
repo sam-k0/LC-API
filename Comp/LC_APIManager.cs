@@ -9,8 +9,7 @@ using UnityEngine;
 
 namespace LC_API.Comp
 {
-    
-    internal class SVAPI : MonoBehaviour
+    internal class LC_APIManager : MonoBehaviour
     {
         public static MenuManager MenuManager;
         public static bool netTester = false;
@@ -20,6 +19,7 @@ namespace LC_API.Comp
         public void Update()
         {
             GameState.GSUpdate();
+            GameTips.UpdateInternal();
             if (HUDManager.Instance != null & netTester)
             {
                 if (GameNetworkManager.Instance.localPlayerController  != null)
@@ -46,7 +46,7 @@ namespace LC_API.Comp
             {
                 if (playerCount < GameNetworkManager.Instance.connectedPlayers)
                 {
-                    lobbychecktimer = -8f;
+                    lobbychecktimer = -4;
                     wanttoCheckMods = true;
                 }
                 playerCount = GameNetworkManager.Instance.connectedPlayers;

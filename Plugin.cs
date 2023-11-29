@@ -6,26 +6,38 @@ using HarmonyLib;
 using LC_API.Comp;
 using LC_API.ManualPatches;
 using LC_API.ServerAPI;
+using System;
 using System.Reflection;
 using UnityEngine;
 
 namespace LC_API
 {
-//.____    _________           _____  __________ .___  
-//|    |   \_   ___ \         /  _  \ \______   \|   | 
-//|    |   /    \  \/        /  /_\  \ |     ___/|   | 
-//|    |___\     \____      /    |    \|    |    |   | 
-//|_______ \\______  /______\____|__  /|____|    |___| 
-//        \/       \//_____/        \/                 
+    // .____    _________           _____  __________ .___  
+    // |    |   \_   ___ \         /  _  \ \______   \|   | 
+    // |    |   /    \  \/        /  /_\  \ |     ___/|   | 
+    // |    |___\     \____      /    |    \|    |    |   | 
+    // |_______ \\______  /______\____|__  /|____|    |___| 
+    //         \/       \//_____/        \/                 
+    /// <summary>
+    /// The Lethal Company modding API plugin!
+    /// </summary>
     [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
-    public class Plugin : BaseUnityPlugin
+    public sealed class Plugin : BaseUnityPlugin
     {
-        public static ManualLogSource Log;
-        public static bool Initialized = false;
+        /// <summary>
+        /// Runs after the LC API plugin's "Awake" method is finished.
+        /// </summary>
+        public static bool Initialized { get; private set; }
+
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+        internal static ManualLogSource Log;
+
         private ConfigEntry<bool> configOverrideModServer;
         private ConfigEntry<bool> configLegacyAssetLoading;
         private ConfigEntry<bool> configDisableBundleLoader;
         private ConfigEntry<bool> configHideCheatlist;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+
         private void Awake()
         {
             configOverrideModServer = Config.Bind("General","Force modded server browser",false,"Should the API force you into the modded server browser?");
@@ -47,52 +59,38 @@ namespace LC_API
             
 
             Harmony harmony = new Harmony("ModAPI");
-            // Save anchors
-            MethodInfo trampolineOnLobbyCreate = AccessTools.Method(typeof(GameNetworkManager), "SteamMatchmaking_OnLobbyCreated");
-            MethodInfo trampolineLobbyDataIsJoinable = AccessTools.Method(typeof(GameNetworkManager), "LobbyDataIsJoinable"); // unused?
-            MethodInfo trampolineAwake = AccessTools.Method(typeof(MenuManager), "Awake");
-            MethodInfo trampolineAddChatMessage = AccessTools.Method(typeof(HUDManager), "AddChatMessage");
-            // Create hooks
-            MethodInfo hookOnLobbyCreate = AccessTools.Method(typeof(ManualPatches.ServerPatch), "OnLobbyCreate");
-            MethodInfo hookAwake = AccessTools.Method(typeof(ServerPatch), "Vers");
-            MethodInfo hookAddChatMessage = AccessTools.Method(typeof(ServerPatch), "ChatInterpreter");
+            MethodInfo originalLobbyCreated = AccessTools.Method(typeof(GameNetworkManager), "SteamMatchmaking_OnLobbyCreated");
+            MethodInfo originalLobbyJoinable = AccessTools.Method(typeof(GameNetworkManager), "LobbyDataIsJoinable");
 
-            harmony.Patch(
-                    trampolineAwake,
-                    new HarmonyMethod(hookAwake)
-            );
-            
-            harmony.Patch(
-                    trampolineAddChatMessage, 
-                    new HarmonyMethod(hookAddChatMessage)
-            );
+            MethodInfo patchLobbyCreate = AccessTools.Method(typeof(ServerPatch), nameof(ServerPatch.OnLobbyCreate));
 
-            harmony.Patch(
-                    trampolineOnLobbyCreate,
-                    new HarmonyMethod(hookOnLobbyCreate)
-            );
+            MethodInfo originalMenuAwake = AccessTools.Method(typeof(MenuManager), "Awake");
+
+            MethodInfo patchCacheMenuMgr = AccessTools.Method(typeof(ServerPatch), nameof(ServerPatch.CacheMenuManager));
+
+            MethodInfo originalAddChatMsg = AccessTools.Method(typeof(HUDManager), "AddChatMessage");
+
+            MethodInfo patchChatInterpreter = AccessTools.Method(typeof(ServerPatch), nameof(ServerPatch.ChatInterpreter));
+
+            harmony.Patch(originalMenuAwake, new HarmonyMethod(patchCacheMenuMgr));
+            harmony.Patch(originalAddChatMsg, new HarmonyMethod(patchChatInterpreter));
+            harmony.Patch(originalLobbyCreated, new HarmonyMethod(patchLobbyCreate));
             
-            Networking.GetString += CheatDatabase.RequestModList;
+            Networking.GetString += CheatDatabase.CDNetGetString;
+            Networking.GetListString += Networking.LCAPI_NET_SYNCVAR_SET;
         }
 
-        public void Start()
+        internal void Start()
         {
-            if (!Initialized)
-            {
-                Initialized = true;
-                if (!configDisableBundleLoader.Value)
-                {
-                    BundleAPI.BundleLoader.Load(configLegacyAssetLoading.Value); 
-                }
-                GameObject gameObject = new GameObject("API");
-                DontDestroyOnLoad(gameObject);
-                gameObject.AddComponent<SVAPI>();
-                Logger.LogInfo($"LC_API Started!");
-                CheatDatabase.RunLocalCheatDetector(configHideCheatlist.Value);
-            }
+            Initialize();
         }
 
-        private void OnDestroy()
+        internal void OnDestroy()
+        {
+            Initialize();
+        }
+
+        internal void Initialize()
         {
             if (!Initialized)
             {
@@ -103,13 +101,13 @@ namespace LC_API
                 }
                 GameObject gameObject = new GameObject("API");
                 DontDestroyOnLoad(gameObject);
-                gameObject.AddComponent<SVAPI>();
+                gameObject.AddComponent<LC_APIManager>();
                 Logger.LogInfo($"LC_API Started!");
                 CheatDatabase.RunLocalCheatDetector(configHideCheatlist.Value);
             }
         }
 
-        private static void PatchMethodManual(MethodInfo method, MethodInfo patch, Harmony harmony)
+        internal static void PatchMethodManual(MethodInfo method, MethodInfo patch, Harmony harmony)
         {
             harmony.Patch(method, new HarmonyMethod(patch));
         }
