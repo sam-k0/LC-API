@@ -24,7 +24,11 @@ namespace LC_API
 
         public static void RunLocalCheatDetector(bool hideCheats)
         {
-            if (hideCheats) return;
+            if (hideCheats)
+            {
+                Plugin.Log.LogWarning("[Incognito Mode for Sussy Imposters] Blocked a modlist request.");
+                return;
+            };
 
             PluginsLoaded = Chainloader.PluginInfos;
 
@@ -46,6 +50,7 @@ namespace LC_API
             Networking.Broadcast("LC_API_CD_Broadcast", "LC_API_ReqGUID");
         }
 
+        // Requests the mod
         internal static void RequestModList(string data, string signature)
         {
             if (data == "LC_API_CD_Broadcast" & signature == "LC_API_ReqGUID")
@@ -54,7 +59,7 @@ namespace LC_API
                 foreach (PluginInfo info in PluginsLoaded.Values)
                 {
                     mods += "\n" + info.Metadata.GUID;
-                }
+                }                              
                 Networking.Broadcast(GameNetworkManager.Instance.localPlayerController.playerUsername + " responded with these mods:" + mods, "LC_APISendMods");
             }
 
