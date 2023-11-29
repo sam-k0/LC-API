@@ -1,7 +1,9 @@
-I forked this to refactor this absolute pile of yandere dev level code.</br>
-Original Readme below.
 # LC-API
 The definitive Lethal Company modding API. Includes some very useful features to make modding life easier.
+This fork contains privacy options:
+- Incongito Mode: Will make you appear as Unmodded
+- Family Friendly Modlist: Will only expose mods that aren't classified as cheats.
+
 
 # Installation
 First, install BepInEx 5 into your game

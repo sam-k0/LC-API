@@ -20,24 +20,33 @@ namespace LC_API
 
         private static Dictionary<string, PluginInfo> PluginsLoaded = new Dictionary<string, PluginInfo>();
 
-
-        private static Dictionary<string, PluginInfo> PluginsLoaded = new Dictionary<string, PluginInfo>();
         private static List<string> KnownCheats = new List<string> {
             "mikes.lethalcompany.mikestweaks",
             "mom.llama.enhancer",
             "Posiedon.GameMaster",
-            "LethalCompanyScalingMaster"
+            "LethalCompanyScalingMaster",
+            "verity.amberalert"
         };
 
-        public static void RunLocalCheatDetector(bool hideCheats)
+        public static void RunLocalCheatDetector(bool hideModlist,bool hideCheats)
         {
-            if (hideCheats)
+            if (hideModlist) // Incognito: Block request completely and appear as unmodded
             {
                 Plugin.Log.LogWarning("[Incognito Mode for Sussy Imposters] Blocked a modlist request.");
                 return;
             };
 
             PluginsLoaded = Chainloader.PluginInfos;
+
+            // If we are using half incognito: Remove only the suspicious mods
+            if(hideCheats)
+            {
+                // Remove entries with values in KnownCheats list
+                PluginsLoaded = PluginsLoaded.Where(kv => !KnownCheats.Contains(kv.Value.Metadata.GUID))
+                                             .ToDictionary(kv => kv.Key, kv => kv.Value);
+
+                Plugin.Log.LogWarning("[Half Incognito] Removed only suspicious mods");
+            }
 
             foreach (PluginInfo info in PluginsLoaded.Values)
             {
