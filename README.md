@@ -1,3 +1,5 @@
+I forked this to refactor this absolute pile of yandere dev level code.</br>
+Original Readme below.
 # LC-API
 The definitive Lethal Company modding API. Includes some very useful features to make modding life easier.
 
