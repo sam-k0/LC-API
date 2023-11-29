@@ -44,15 +44,14 @@ namespace LC_API
             configLegacyAssetLoading = Config.Bind("General", "Legacy asset bundle loading", false, "Should the BundleLoader use legacy asset loading? Turning this on may help with loading assets from older plugins.");
             configDisableBundleLoader = Config.Bind("General", "Disable BundleLoader", false, "Should the BundleLoader be turned off? Enable this if you are having problems with mods that load assets using a different method from LC_API's BundleLoader.");
             configIncognitoMode = Config.Bind("General", "Incognito Mode", true, "This will hide your installed plugins from being exposed which will make you appear as unmodded client towards others");
-            configFilterModlist = Config.Bind("General", "Hide installed 'Cheats'", true, "This will expose all plugins except for plugins that are classified as 'Cheats'.");
+            configFilterModlist = Config.Bind("General", "Hide installed Cheats", true, "This will expose all plugins except for plugins that are classified as Cheats.");
 
             Log = Logger;
             // Plugin startup logic
             Logger.LogWarning("\n.____    _________           _____  __________ .___  \r\n|    |   \\_   ___ \\         /  _  \\ \\______   \\|   | \r\n|    |   /    \\  \\/        /  /_\\  \\ |     ___/|   | \r\n|    |___\\     \\____      /    |    \\|    |    |   | \r\n|_______ \\\\______  /______\\____|__  /|____|    |___| \r\n        \\/       \\//_____/        \\/                 \r\n                                                     ");
             Logger.LogInfo($"LC_API Starting up..");
-
-            Logger.LogWarning("Using incognito mode: "+ (configIncognitoMode.Value ? "Yes" : "No"));
-            Logger.LogWarning("Hiding Cheats from others: " + (configFilterModlist.Value ? "Yes" : "No"));
+            Logger.LogWarning($"Using incognito mode: { (configIncognitoMode.Value ? "Yes" : "No")}");
+            Logger.LogWarning($"Hiding Cheats from others: {(configFilterModlist.Value ? "Yes" : "No")}");
             if (configOverrideModServer.Value)
             {
                 ModdedServer.SetServerModdedOnly();

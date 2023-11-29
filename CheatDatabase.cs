@@ -46,7 +46,15 @@ namespace LC_API
                                              .ToDictionary(kv => kv.Key, kv => kv.Value);
 
                 Plugin.Log.LogWarning("[Half Incognito] Removed only suspicious mods");
+
+                Plugin.Log.LogWarning("[Half Incognito] Filter result:");
+                foreach(PluginInfo pluginInfo in PluginsLoaded.Values)
+                {
+                    Plugin.Log.LogWarning(pluginInfo.Metadata.GUID);
+                }
             }
+
+
 
             foreach (PluginInfo info in PluginsLoaded.Values)
             {
