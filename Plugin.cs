@@ -37,7 +37,8 @@ namespace LC_API
         private ConfigEntry<bool> configDisableBundleLoader;
         private ConfigEntry<bool> configIncognitoMode;
         private ConfigEntry<bool> configFilterModlist;
-
+        private ConfigEntry<string> configCustomModJoinMessage;
+        
         private void Awake()
         {
             configOverrideModServer = Config.Bind("General","Force modded server browser",false,"Should the API force you into the modded server browser?");
@@ -45,7 +46,8 @@ namespace LC_API
             configDisableBundleLoader = Config.Bind("General", "Disable BundleLoader", false, "Should the BundleLoader be turned off? Enable this if you are having problems with mods that load assets using a different method from LC_API's BundleLoader.");
             configIncognitoMode = Config.Bind("General", "Incognito Mode", true, "This will hide your installed plugins from being exposed which will make you appear as unmodded client towards others");
             configFilterModlist = Config.Bind("General", "Hide installed Cheats", true, "This will expose all plugins except for plugins that are classified as Cheats.");
-
+            configCustomModJoinMessage = Config.Bind("General", "Custom Join Message", "", "The message shown to other players upon modcheck. Shows only when Incognito.");
+            
             Log = Logger;
             // Plugin startup logic
             Logger.LogWarning("\n.____    _________           _____  __________ .___  \r\n|    |   \\_   ___ \\         /  _  \\ \\______   \\|   | \r\n|    |   /    \\  \\/        /  /_\\  \\ |     ___/|   | \r\n|    |___\\     \\____      /    |    \\|    |    |   | \r\n|_______ \\\\______  /______\\____|__  /|____|    |___| \r\n        \\/       \\//_____/        \\/                 \r\n                                                     ");
@@ -57,6 +59,10 @@ namespace LC_API
                 ModdedServer.SetServerModdedOnly();
             }
 
+            if(configIncognitoMode.Value)
+            {
+                CheatDatabase.customMessage = (configCustomModJoinMessage.Value);
+            }
             
 
             Harmony harmony = new Harmony("ModAPI");

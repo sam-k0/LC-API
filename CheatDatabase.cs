@@ -18,6 +18,9 @@ namespace LC_API
         const string SIG_REQ_GUID = "LC_API_ReqGUID";
         const string SIG_SEND_MODS = "LC_APISendMods";
 
+
+        public static string customMessage = "";
+
         private static Dictionary<string, PluginInfo> PluginsLoaded = new Dictionary<string, PluginInfo>();
 
         private static List<string> KnownCheats = new List<string> {
@@ -80,17 +83,27 @@ namespace LC_API
         {
             if (data == DAT_CD_BROADCAST && signature == SIG_REQ_GUID)
             {
+                Plugin.Log.LogWarning("DAT_CD_BROADCAST && SIG_REQ_GUID");
+                Plugin.Log.LogWarning($"Custom message is: {customMessage}");
                 string mods = "";
                 foreach (PluginInfo info in PluginsLoaded.Values)
                 {
                     mods += "\n" + info.Metadata.GUID;
                 }
-                Networking.Broadcast(GameNetworkManager.Instance.localPlayerController.playerUsername + " responded with these mods:" + mods, SIG_SEND_MODS);
+
+                string sendModMessage = GameNetworkManager.Instance.localPlayerController.playerUsername + " responded with these mods:" + mods;
+                if (customMessage != "")
+                {
+                    sendModMessage = customMessage; // Overwrite 
+                }
+
+                Networking.Broadcast(sendModMessage, SIG_SEND_MODS);
             }
 
             if (signature == SIG_SEND_MODS)
             {
-                GameTips.ShowTip("Mod List:", data);
+                GameTips.ShowTip("Mod List (SIG_SEND_MODS):", data);
+                Plugin.Log.LogError("SIG_SEND_MODS");
                 Plugin.Log.LogWarning(data);
             }
         }

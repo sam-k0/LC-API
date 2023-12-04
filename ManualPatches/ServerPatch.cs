@@ -24,7 +24,8 @@ namespace LC_API.ManualPatches
             {
                 Debug.LogError(string.Format("Lobby could not be created! {0}", result), __instance);
             }
-            __instance.lobbyHostSettings.lobbyName = "[MODDED]" + __instance.lobbyHostSettings.lobbyName.ToString();
+            
+            __instance.lobbyHostSettings.lobbyName = __instance.lobbyHostSettings.lobbyName.ToString();
             Plugin.Log.LogMessage("server pre-setup success");
             return (true);
         }
