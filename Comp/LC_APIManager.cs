@@ -46,7 +46,7 @@ namespace LC_API.Comp
             {
                 if (playerCount < GameNetworkManager.Instance.connectedPlayers)
                 {
-                    lobbychecktimer = -4;
+                    lobbychecktimer = -4.5f;
                     wanttoCheckMods = true;
                 }
                 playerCount = GameNetworkManager.Instance.connectedPlayers;
@@ -55,7 +55,7 @@ namespace LC_API.Comp
             {
                 lobbychecktimer += Time.deltaTime;
             }
-            else if (wanttoCheckMods)
+            else if (wanttoCheckMods && HUDManager.Instance != null)
             {
                 wanttoCheckMods = false;
                 CD();

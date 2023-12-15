@@ -3,6 +3,7 @@ using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using LC_API.ClientAPI;
 using LC_API.Comp;
 using LC_API.ManualPatches;
 using LC_API.ServerAPI;
@@ -47,6 +48,7 @@ namespace LC_API
             configIncognitoMode = Config.Bind("General", "Incognito Mode", true, "This will hide your installed plugins from being exposed which will make you appear as unmodded client towards others");
             configFilterModlist = Config.Bind("General", "Hide installed Cheats", true, "This will expose all plugins except for plugins that are classified as Cheats.");
             configCustomModJoinMessage = Config.Bind("General", "Custom Join Message", "", "The message shown to other players upon modcheck. Shows only when Incognito.");
+            CommandHandler.commandPrefix = Config.Bind("General", "Prefix", "/", "Command prefix");
             
             Log = Logger;
             // Plugin startup logic
@@ -79,10 +81,15 @@ namespace LC_API
 
             MethodInfo patchChatInterpreter = AccessTools.Method(typeof(ServerPatch), nameof(ServerPatch.ChatInterpreter));
 
+            MethodInfo originalSubmitChat = AccessTools.Method(typeof(HUDManager), "SubmitChat_performed");
+
+            MethodInfo patchSubmitChat = AccessTools.Method(typeof(CommandHandler.SubmitChatPatch), nameof(CommandHandler.SubmitChatPatch.Transpiler));
+
             harmony.Patch(originalMenuAwake, new HarmonyMethod(patchCacheMenuMgr));
             harmony.Patch(originalAddChatMsg, new HarmonyMethod(patchChatInterpreter));
             harmony.Patch(originalLobbyCreated, new HarmonyMethod(patchLobbyCreate));
-            
+            harmony.Patch(originalSubmitChat, null, null, new HarmonyMethod(patchSubmitChat));
+
             Networking.GetString += CheatDatabase.CDNetGetString;
             Networking.GetListString += Networking.LCAPI_NET_SYNCVAR_SET;
         }
